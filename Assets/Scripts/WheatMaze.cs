@@ -19,6 +19,8 @@ public class WheatMaze : MonoBehaviour
     Texture mazTexture;
     MazGen maze;
 
+    MazeObjectManager mazeObjects;
+
     public class MazeGridTile : System.IEquatable<MazeGridTile>
     {
         public Vector2Int GridPosition { get; private set; }
@@ -26,10 +28,13 @@ public class WheatMaze : MonoBehaviour
         public Vector3 GlobalPosition { get; private set; }
         public bool filled { get; private set; }
 
+        public int ID { get; private set; }
+
         public GameObject WallObject { get; set; }
 
-        public MazeGridTile(int x, int y, bool is_filled)
+        public MazeGridTile(int x, int y, int id, bool is_filled)
         {
+            ID = id;
             GridPosition = new Vector2Int(x, y);
             filled = is_filled;
 
@@ -46,27 +51,37 @@ public class WheatMaze : MonoBehaviour
 
         public bool Equals(MazeGridTile other)
         {
-            return GridPosition.Equals(other.GridPosition);
+            return ID == other.ID;
+            //return GridPosition.Equals(other.GridPosition);
         }
 
         public override int GetHashCode()
         {
-            return GridPosition.GetHashCode();
+            return ID;
         }
     }
 
     List<MazeGridTile> WallTiles = new List<MazeGridTile>();
     List<MazeGridTile> OpenTiles = new List<MazeGridTile>();
+    MazeGridTile exitTile;
 
     private void Awake()
     {
-        Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Debug.LogWarning("Duplicate Maze script attempted!");
+        }
         
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        mazeObjects = GetComponent<MazeObjectManager>();
         GenerateMaze();
     }
 
@@ -105,28 +120,84 @@ public class WheatMaze : MonoBehaviour
         maze = new MazGen(maze_size_x, maze_size_y, seed, maze_smooth);
         mazTexture = maze.GetTexture();
 
-        for (int x = 0; x < maze.Width(); x++)
+        int width = maze.Width();
+        int height = maze.Height();
+
+        int exit_start_offset = Random.Range((int)(height * (1 / 4.0f)), (int)(height * (3 / 4.0f)));
+
+        int id = 0;
+        bool found_exit_tile = false;
+        for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < maze.Height(); y++)
+            for (int y = 0; y < height; y++)
             {
                 double tile_val = maze.GetValue(x, y);
-                if (tile_val < 0.5)
+
+                bool is_exit_tile = false;
+                if (!found_exit_tile && x == 0 && y >= exit_start_offset && maze.GetValue(1, y) >= 0.5)
                 {
-                    WallTiles.Add(new MazeGridTile(x, y, true));
+                    found_exit_tile = true;
+                    is_exit_tile = true;
+                }
+
+                bool is_wall_tile = tile_val < 0.5 && !is_exit_tile;
+                MazeGridTile tile = new MazeGridTile(x, y, id, is_wall_tile);
+
+                if (is_wall_tile)
+                {
+                    WallTiles.Add(tile);
                 }
                 else
                 {
-                    OpenTiles.Add(new MazeGridTile(x, y, true));
+                    OpenTiles.Add(tile);
                 }
+
+                if (is_exit_tile)
+                {
+                    exitTile = tile;
+                }
+
+                id++;
+
+                /*if (tile_val < 0.5 && !is_exit_tile)
+                {
+                    WallTiles.Add(new MazeGridTile(x, y, id, true));
+                }
+                else
+                {
+                    MazeGridTile tile = new MazeGridTile(x, y, id, false);
+
+                    OpenTiles.Add(tile);
+                }*/
+
             }
         }
 
+        
+
         CreateMazeWalls();
+        mazeObjects.PopulateObjects();
 
         ready = true;
 
         genWatch.Stop();
         Debug.LogFormat("Maze generation time: {0} ms", genWatch.Elapsed.TotalMilliseconds);
         Debug.LogFormat("Wall Tiles: {0}, Open Tiles: {1}", WallTiles.Count, OpenTiles.Count);
+    }
+
+    public List<MazeGridTile> GetWallTiles()
+    {
+        return WallTiles;
+    }
+
+    public List<MazeGridTile> GetOpenTiles()
+    {
+        return OpenTiles;
+    }
+
+    public MazeGridTile GetRandomOpenTile()
+    {
+        int id = Random.Range(0, OpenTiles.Count - 1);
+        return OpenTiles[id];
     }
 }
