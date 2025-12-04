@@ -94,6 +94,8 @@ public class WheatMaze : MonoBehaviour
 
     void OnGUI()
     {
+        return;
+
         if (!ready)
             return;
         GUI.DrawTexture(
@@ -102,6 +104,11 @@ public class WheatMaze : MonoBehaviour
                 20,
                 tex_size_x, tex_size_y),
             mazTexture);
+    }
+
+    public MazeGridTile ExitTile()
+    {
+        return exitTile;
     }
 
     void CreateMazeWalls()
