@@ -10,7 +10,8 @@ public class WheatMaze : MonoBehaviour
     public int maze_size_x;
     public int maze_size_y;
     public int maze_smooth;
-    public GameObject mazeWallPrefab;
+    public GameObject[] mazeWallPrefab;
+    public GameObject player;
 
     public int tex_size_x;
     public int tex_size_y;
@@ -107,7 +108,7 @@ public class WheatMaze : MonoBehaviour
     {
         foreach (var tile in WallTiles)
         {
-            tile.Init(mazeWallPrefab, transform);
+            tile.Init(mazeWallPrefab[Random.Range(0, 100) % 3], transform);
         }
     }
 
@@ -183,6 +184,10 @@ public class WheatMaze : MonoBehaviour
         genWatch.Stop();
         Debug.LogFormat("Maze generation time: {0} ms", genWatch.Elapsed.TotalMilliseconds);
         Debug.LogFormat("Wall Tiles: {0}, Open Tiles: {1}", WallTiles.Count, OpenTiles.Count);
+
+        MazeGridTile spawnTile = OpenTiles[Random.Range(0, OpenTiles.Count - 1)];
+        Vector3 spawn_pos = new Vector3(spawnTile.GlobalPosition.x + 0.5f, player.transform.position.y, spawnTile.GlobalPosition.z);
+        player.transform.position = spawn_pos;
     }
 
     public List<MazeGridTile> GetWallTiles()
