@@ -11,7 +11,7 @@ public class WheatMaze : MonoBehaviour
     public int maze_size_y;
     public int maze_smooth;
     public GameObject[] mazeWallPrefab;
-    public GameObject player;
+    
 
     public int tex_size_x;
     public int tex_size_y;
@@ -64,6 +64,8 @@ public class WheatMaze : MonoBehaviour
 
     List<MazeGridTile> WallTiles = new List<MazeGridTile>();
     List<MazeGridTile> OpenTiles = new List<MazeGridTile>();
+    List<MazeGridTile> AllTiles = new List<MazeGridTile>();
+    Dictionary<Vector2Int, MazeGridTile> tile_map = new Dictionary<Vector2Int, MazeGridTile> ();
     MazeGridTile exitTile;
 
     private void Awake()
@@ -82,8 +84,8 @@ public class WheatMaze : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        mazeObjects = GetComponent<MazeObjectManager>();
-        GenerateMaze();
+        //mazeObjects = GetComponent<MazeObjectManager>();
+        //GenerateMaze();
     }
 
     // Update is called once per frame
@@ -119,8 +121,10 @@ public class WheatMaze : MonoBehaviour
         }
     }
 
-    void GenerateMaze()
+    public void GenerateMaze()
     {
+        mazeObjects = GetComponent<MazeObjectManager>();
+
         StopWatch genWatch = new StopWatch();
         genWatch.Start();
         int seed = (int)(System.DateTime.Now.TimeOfDay.TotalMilliseconds / 10);
@@ -165,6 +169,9 @@ public class WheatMaze : MonoBehaviour
                     exitTile = tile;
                 }
 
+                AllTiles.Add(tile);
+                tile_map[tile.GridPosition] = tile;
+
                 id++;
 
                 /*if (tile_val < 0.5 && !is_exit_tile)
@@ -192,9 +199,10 @@ public class WheatMaze : MonoBehaviour
         Debug.LogFormat("Maze generation time: {0} ms", genWatch.Elapsed.TotalMilliseconds);
         Debug.LogFormat("Wall Tiles: {0}, Open Tiles: {1}", WallTiles.Count, OpenTiles.Count);
 
-        MazeGridTile spawnTile = OpenTiles[Random.Range(0, OpenTiles.Count - 1)];
-        Vector3 spawn_pos = new Vector3(spawnTile.GlobalPosition.x + 0.5f, player.transform.position.y, spawnTile.GlobalPosition.z);
-        player.transform.position = spawn_pos;
+        
+
+
+
     }
 
     public List<MazeGridTile> GetWallTiles()
@@ -205,6 +213,30 @@ public class WheatMaze : MonoBehaviour
     public List<MazeGridTile> GetOpenTiles()
     {
         return OpenTiles;
+    }
+
+    public bool HasTile(Vector2Int grid_position)
+    {
+        if (maze == null || tile_map == null || tile_map.Count <= 0)
+        {
+            return false;
+        }
+
+        return tile_map.ContainsKey(grid_position);
+
+        //return grid_position.x >= 0 && grid_position.x < maze.Width() &&
+        //       grid_position.y >= 0 && grid_position.y < maze.Height();
+    }
+
+    public MazeGridTile GetTile(Vector2Int grid_position)
+    {
+        if (!HasTile(grid_position))
+        {
+            Debug.LogError("Invalid grid tile! Did you call HasTile first?");
+            return null;
+        }
+
+        return tile_map[grid_position];
     }
 
     public MazeGridTile GetRandomOpenTile()
