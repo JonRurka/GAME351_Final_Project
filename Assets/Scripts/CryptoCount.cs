@@ -2,9 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Runtime.CompilerServices;
 
 public class CryptoCount : MonoBehaviour
 {
+    public PlayerControll player;
+
     TMP_Text count;
     void Awake()
     {
@@ -14,8 +17,6 @@ public class CryptoCount : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // no script for tracking amount of crypto coins
-        // on field or picked up, currently.
-        count.text = "##/##" + " CryptoCoins";
+        count.text = string.Format("Crypto Needed: {0}/{1}", player.crypto_count, GameController.Instance.needed_coins);
     }
 }

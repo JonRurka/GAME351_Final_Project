@@ -7,6 +7,7 @@ public class PlayerControll : MonoBehaviour
     public float move_speed;
     public float rotation_speed;
     public GameObject camera_obj;
+    public float crypto_count;
 
     private CharacterController characterController;
     private bool cursor_is_locked = true;
@@ -70,6 +71,15 @@ public class PlayerControll : MonoBehaviour
 
             rotY = Mathf.Clamp(rotY, -80f, 80f);
             camera_obj.transform.localRotation = Quaternion.Euler(rotY, 0, 0);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Crypto")
+        {
+            crypto_count++;
+            Destroy(other.gameObject);
         }
     }
 

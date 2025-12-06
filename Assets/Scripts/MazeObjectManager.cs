@@ -31,6 +31,8 @@ public class MazeObjectManager : MonoBehaviour
 
     public void PopulateObjects()
     {
+        maxCoins = Mathf.Min(GameController.Instance.needed_coins, maxCoins);
+
         if (maxCoins + maxAmmo + maxHealth >= WheatMaze.Instance.GetOpenTiles().Count)
         {
             Debug.LogError("ERROR: Combined obect counts cannot exceed number of open maze tiles!");

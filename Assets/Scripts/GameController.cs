@@ -7,6 +7,7 @@ public class GameController : MonoBehaviour
 {
     public static GameController Instance { get; private set; }
     public GameObject player;
+    public int needed_coins = 20;
 
     private void Awake()
     {
