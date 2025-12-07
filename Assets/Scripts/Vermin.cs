@@ -22,6 +22,12 @@ public class Vermin : MonoBehaviour
     public float move_speed = 10.0f;
     public float max_player_dist = 5.0f;
     public int max_ping_pong = 4;
+    public float life = 1.0f;
+    public bool dead = false;
+
+    public ParticleSystem plasma;
+
+    public AudioSource walk_audio;
 
     private Vector3 start_pos;
     private Vector3 target_pos;
@@ -32,6 +38,15 @@ public class Vermin : MonoBehaviour
     private Direction current_direction = Direction.Forward;
     private Direction last_direction = Direction.Forward;
 
+    private Animator animController;
+
+    private float plasma_timer;
+
+    private float step_duration = 0.3f;
+    private float step_timer;
+    private float org_Step_volume;
+    private float step_vol_dt;
+
     private struct TileTest
     {
         bool Valid;
@@ -41,7 +56,11 @@ public class Vermin : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        animController = GetComponent<Animator>();
+        plasma_timer = Random.Range(0, 2.0f);
+        plasma.trigger.AddCollider(PlayerControll.Instance.gameObject.GetComponent<CharacterController>());
+        step_timer = step_duration;
+        org_Step_volume = walk_audio.volume;
     }
 
     // Update is called once per frame
@@ -49,6 +68,14 @@ public class Vermin : MonoBehaviour
     {
         if (!inited)
             return;
+
+        if (dead)
+        {
+            animController.SetBool("Hit", false);
+            animController.SetBool("Move", false);
+            animController.SetBool("Dead", true);
+            return;
+        }
 
         bool stop_cause_player = false;
 
@@ -65,8 +92,36 @@ public class Vermin : MonoBehaviour
         }
 
 
+        step_timer -= Time.deltaTime;
+
         if (stop_cause_player)
+        {
+            animController.SetBool("Move", false);
+
+            step_vol_dt -= 0.5f * Time.deltaTime;
+            walk_audio.volume = Mathf.Lerp(org_Step_volume, 0, step_vol_dt);
+
+            plasma_timer -= Time.deltaTime;
+            if (plasma_timer < 0)
+            {
+                plasma_timer = Random.Range(3.0f, 7.0f);
+                ShootPlasma();
+            }
+
+
             return;
+        }
+        animController.SetBool("Move", true);
+
+        if (step_timer <= 0)
+        {
+            step_vol_dt = 1;
+            walk_audio.volume = org_Step_volume;
+            step_timer = step_duration;
+            walk_audio.time = 0.07f;
+            walk_audio.Play();
+        }
+
 
         Vector3 target_dir = (target_pos - transform.position).normalized;
 
@@ -98,6 +153,47 @@ public class Vermin : MonoBehaviour
         Debug.DrawRay(Current_Tile.GlobalPosition + new Vector3(0.5f, 0, 0.5f), Vector3.up * 5, Color.blue, 10000);
         set_next_tile();
         inited = true;
+    }
+
+    public void Shot()
+    {
+        if (dead) return;
+
+        Debug.Log("Vermin hit with slug!");
+        life -= 0.3f;
+
+        if (life <= 0)
+        {
+            Die();
+        }
+        else
+        {
+            animController.SetBool("Hit", true);
+            Invoke("ResetHit", 0.3f);
+        }
+    }
+
+    public void Die()
+    {
+        if (dead)
+            return;
+
+        dead = true;
+        animController.SetBool("Hit", false);
+        animController.SetBool("Move", false);
+        animController.SetBool("Dead", true);
+        GetComponent<CapsuleCollider>().enabled = false;
+    }
+
+    public void ResetHit()
+    {
+        animController.SetBool("Hit", false);
+    }
+
+    public void ShootPlasma()
+    {
+        plasma.Play();
+
     }
 
     void set_next_tile()

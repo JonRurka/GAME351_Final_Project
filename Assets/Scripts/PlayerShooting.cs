@@ -6,6 +6,8 @@ public class PlayerShooting : MonoBehaviour
 {
     public GameObject prefab;
     public GameObject shootPoint;
+    public GameObject blood_prefab;
+    public ParticleSystem muzzel_ps;
     public int ammoCount;
     public int add_ammo = 5;
     public float shoot_cooldown = 1.0f;
@@ -15,7 +17,7 @@ public class PlayerShooting : MonoBehaviour
 
     private float shoot_timer;
     private Light gun_flash;
-
+    public AudioSource gun_shot_sound;
 
     // Start is called before the first frame update
     private void Start()
@@ -39,17 +41,32 @@ public class PlayerShooting : MonoBehaviour
     {
         if (ammoCount > 0)
         {
+            gun_shot_sound.time = 0.11f;
+            gun_shot_sound.Play();
+
             for (int i = 0; i < 3; i++)
             {
                 Vector3 rand_dir = get_random_vector();
 
                 Ray ray = new Ray(shootPoint.transform.position, rand_dir);
 
+                RaycastHit hit;
                 Debug.DrawRay(ray.origin, ray.direction * 10, Color.blue, 10000);
+                if (Physics.Raycast(ray, out hit, 25))
+                {
+                    if (hit.collider.tag == "Vermin")
+                    {
+                        GameObject obj = Instantiate(blood_prefab, hit.point + ray.direction * 0.1f, Quaternion.identity);
+                        obj.transform.forward = -ray.direction;
+                        hit.collider.gameObject.SendMessageUpwards("Shot", SendMessageOptions.DontRequireReceiver);
+                    }
+                }
             }
 
             gun_flash.enabled = true;
             Invoke("disable_muzzel_flash", muzzel_flash_duration);
+            muzzel_ps.Play();
+            
             //Instantiate(prefab, shootPoint.transform.position, shootPoint.transform.rotation);
             ammoCount--;
         }

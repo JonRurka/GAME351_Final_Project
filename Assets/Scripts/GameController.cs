@@ -5,9 +5,17 @@ using static WheatMaze;
 
 public class GameController : MonoBehaviour
 {
+    public enum GameState
+    {
+        Game,
+        Win,
+        Loose
+    }
+
     public static GameController Instance { get; private set; }
     public GameObject player;
     public int needed_coins = 20;
+    public GameState current_state = GameState.Game;
 
     private void Awake()
     {
@@ -39,6 +47,16 @@ public class GameController : MonoBehaviour
         WheatMaze.Instance.GenerateMaze();
         VerminController.Instance.SpawnInitialVermin();
         set_player();
+    }
+
+    public void VerminDied()
+    {
+        
+    }
+
+    public void PlayerDied()
+    {
+        current_state = GameState.Loose;
     }
 
     void set_player()

@@ -9,6 +9,9 @@ public class VerminController : MonoBehaviour
     public GameObject Vermin_prefab;
     public int spawn_amount = 10;
 
+    
+
+
     private void Awake()
     {
         if (Instance == null)
