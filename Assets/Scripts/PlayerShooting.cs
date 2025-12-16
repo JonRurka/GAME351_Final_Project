@@ -91,7 +91,7 @@ public class PlayerShooting : MonoBehaviour
         if (other.gameObject.tag == "Ammo")
         {
             ammoCount += add_ammo;
-            Destroy(other.gameObject);
+            //Destroy(other.gameObject);
         }
     }
 

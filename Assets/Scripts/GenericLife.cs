@@ -21,7 +21,7 @@ public class GenericLife : MonoBehaviour
         {
 
             amount += add_life;
-            Destroy(other.gameObject);
+            //Destroy(other.gameObject);
             
         }
 
@@ -47,7 +47,7 @@ public class GenericLife : MonoBehaviour
             return;
         }
 
-
+        GameController.Instance.PlayerDied();
 
         dead = true;
     }

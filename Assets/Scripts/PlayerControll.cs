@@ -94,7 +94,7 @@ public class PlayerControll : MonoBehaviour
             walk_audio.volume = Mathf.Lerp(org_Step_volume, 0, step_vol_dt);
         }
 
-            float look_x = Input.GetAxis("Mouse X"); // horizontal
+        float look_x = Input.GetAxis("Mouse X"); // horizontal
         float look_y = -Input.GetAxis("Mouse Y"); // vertical
 
         Vector3 move_dir = (moveInput.y * transform.forward + moveInput.x * transform.right) * move_speed * Time.deltaTime;
@@ -116,8 +116,14 @@ public class PlayerControll : MonoBehaviour
         if (other.gameObject.tag == "Crypto")
         {
             crypto_count++;
-            Destroy(other.gameObject);
+
+            if (crypto_count >= GameController.Instance.needed_coins)
+            {
+                GameController.Instance.SpawnExitPortal();
+            }
         }
+
+        other.gameObject.SendMessageUpwards("Interact", SendMessageOptions.DontRequireReceiver);
     }
 
     void LockCursur(bool locked)

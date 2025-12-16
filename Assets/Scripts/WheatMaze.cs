@@ -13,8 +13,8 @@ public class WheatMaze : MonoBehaviour
     public GameObject[] mazeWallPrefab;
     
 
-    public int tex_size_x;
-    public int tex_size_y;
+    int tex_size_x = 200;
+    int tex_size_y = 200;
 
     bool ready = false;
     Texture mazTexture;
@@ -96,6 +96,7 @@ public class WheatMaze : MonoBehaviour
 
     void OnGUI()
     {
+        /*
         return;
 
         if (!ready)
@@ -105,7 +106,7 @@ public class WheatMaze : MonoBehaviour
                 20,
                 20,
                 tex_size_x, tex_size_y),
-            mazTexture);
+            mazTexture);*/
     }
 
     public MazeGridTile ExitTile()
@@ -129,11 +130,13 @@ public class WheatMaze : MonoBehaviour
         genWatch.Start();
         int seed = (int)(System.DateTime.Now.TimeOfDay.TotalMilliseconds / 10);
         maze_smooth = Random.Range(400, 600);
-        maze = new MazGen(maze_size_x, maze_size_y, seed, maze_smooth);
+        maze = new MazGen(maze_size_x / 2, maze_size_y / 2, seed, maze_smooth);
         mazTexture = maze.GetTexture();
 
         int width = maze.Width();
         int height = maze.Height();
+
+        Debug.LogFormat("Generated {0}x{1} maze", width, height);
 
         int exit_start_offset = Random.Range((int)(height * (1 / 4.0f)), (int)(height * (3 / 4.0f)));
 

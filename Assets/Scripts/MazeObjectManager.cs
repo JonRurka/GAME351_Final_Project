@@ -31,7 +31,7 @@ public class MazeObjectManager : MonoBehaviour
 
     public void PopulateObjects()
     {
-        maxCoins = Mathf.Min(GameController.Instance.needed_coins, maxCoins);
+        //maxCoins = Mathf.Min(GameController.Instance.needed_coins, maxCoins);
 
         if (maxCoins + maxAmmo + maxHealth >= WheatMaze.Instance.GetOpenTiles().Count)
         {
