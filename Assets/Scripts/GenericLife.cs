@@ -7,7 +7,11 @@ public class GenericLife : MonoBehaviour
     public float amount;
     public float add_life = 10;
     public float remove_life = 1;
+    public AudioSource misc_sounds;
+    public AudioClip hurt_clip;
     public bool dead = false;
+
+    bool playing_hurt = false;
 
     // Update is called once per frame
     void Update()
@@ -38,6 +42,13 @@ public class GenericLife : MonoBehaviour
         {
             Dead();
         }
+
+        if (!playing_hurt)
+        {
+            misc_sounds.PlayOneShot(hurt_clip);
+            Invoke("stop_hurt_sound", 0.5f);
+            playing_hurt = true;
+        }
     }
 
     public void Dead()
@@ -50,6 +61,11 @@ public class GenericLife : MonoBehaviour
         GameController.Instance.PlayerDied();
 
         dead = true;
+    }
+
+    private void stop_hurt_sound()
+    {
+        playing_hurt = false;
     }
 
 }
